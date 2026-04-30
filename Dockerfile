@@ -6,6 +6,6 @@ WORKDIR /app
 COPY . .
 RUN pipenv install --system --deploy
 
-EXPOSE 5000
+EXPOSE 8080
 
 ENTRYPOINT ["./entrypoint.sh"]
