@@ -78,16 +78,22 @@ pipeline {
             }
         }
 
-        stage('Verify Deployment') {
-            steps {
-                sh '''
-                kubectl rollout status deployment/$APP_NAME
-                kubectl get pods
-                kubectl get svc
-                '''
-            }
+      stage('Verify Deployment') {
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                          credentialsId: 'aws-creds']]) {
+            sh '''
+            aws sts get-caller-identity
+
+            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
+
+            kubectl rollout status deployment/$APP_NAME
+            kubectl get pods
+            kubectl get svc
+            '''
         }
     }
+}
 
     post {
         success {
