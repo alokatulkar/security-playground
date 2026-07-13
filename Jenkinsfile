@@ -4,7 +4,7 @@ pipeline {
 
     environment {
         AWS_REGION   = 'ap-south-1'
-        ECR_REPO     = '612915905322.dkr.ecr.ap-south-1.amazonaws.com/python-app'
+        ECR_REPO     = '623900187979.dkr.ecr.ap-south-1.amazonaws.com/python-app'
         IMAGE_TAG    = "${BUILD_NUMBER}"
         CLUSTER_NAME = 'ekscluster'
         APP_NAME     = 'python-app'
