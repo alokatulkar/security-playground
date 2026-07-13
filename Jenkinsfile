@@ -1,7 +1,6 @@
 pipeline {
     agent any
 
-
     environment {
         AWS_REGION   = 'ap-south-1'
         ECR_REPO     = '623900187979.dkr.ecr.ap-south-1.amazonaws.com/python-app'
@@ -14,7 +13,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/alokatulkar/security-playground.git'
+                git branch: 'main',
+                    url: 'https://github.com/alokatulkar/security-playground.git'
             }
         }
 
@@ -38,9 +38,13 @@ pipeline {
 
         stage('Login to ECR') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                  credentialsId: 'aws-creds']]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
                     sh '''
+                    aws sts get-caller-identity
+
                     aws ecr get-login-password --region $AWS_REGION | \
                     docker login --username AWS --password-stdin $ECR_REPO
                     '''
@@ -66,42 +70,36 @@ pipeline {
 
         stage('Deploy to EKS') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                  credentialsId: 'aws-creds']]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
                     sh '''
+                    aws sts get-caller-identity
+
                     aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
 
                     kubectl apply -f k8s/deployment.yml
                     kubectl apply -f k8s/service.yml
+
+                    kubectl rollout status deployment/$APP_NAME
+                    kubectl get pods
+                    kubectl get svc
                     '''
                 }
             }
         }
-
-      stage('Verify Deployment') {
-    steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds']]) {
-            sh '''
-            aws sts get-caller-identity
-
-            aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME
-
-            kubectl rollout status deployment/$APP_NAME
-            kubectl get pods
-            kubectl get svc
-            '''
-        }
     }
-}
 
     post {
         success {
             echo "✅ Deployment Successful - Image Tag: ${IMAGE_TAG}"
         }
+
         failure {
             echo "❌ Deployment Failed"
         }
+
         always {
             cleanWs()
         }
