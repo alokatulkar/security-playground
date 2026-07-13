@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: python-app
-        image: 612915905322.dkr.ecr.ap-south-1.amazonaws.com/python-app:IMAGE_TAG
+        image: 623900187979.dkr.ecr.ap-south-1.amazonaws.com/python-app:IMAGE_TAG
         ports:
         - containerPort: 8080
